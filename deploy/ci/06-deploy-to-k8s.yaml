@@ -1,0 +1,17 @@
+deploy:k8s:
+  stage: Deploy:k8s
+  tags: [docker]
+  variables:
+    KUBECTL_VERSION: "v1.19.3"
+  before_script:
+    - curl -sSL https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl
+    - chmod +x /usr/local/bin/kubectl
+  script:
+    - mkdir -p $HOME/.kube
+    - echo $KUBE_CONFIG_BASE64 | base64 -d > $HOME/.kube/config
+    - kubectl config view
+    - kubectl delete -f deploy/k8s/workloads/platform-api-deployment.yaml
+    - kubectl apply -f deploy/k8s/workloads/platform-api-deployment.yaml
+    - kubectl get pods
+  only:
+    - master

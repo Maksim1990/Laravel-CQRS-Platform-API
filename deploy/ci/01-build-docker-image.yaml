@@ -1,0 +1,13 @@
+build:docker:image:
+  stage: Build:image
+  image: docker:stable
+  tags: [docker]
+  variables:
+    DOCKER_DRIVER: overlay
+  before_script:
+    - docker login -u $DOCKER_USER -p $DOCKER_PASS
+  script:
+    - docker build -t $APP_DOCKER_IMAGE_NAME -f ./docker/php/Dockerfile_k8s .
+    - docker push $APP_DOCKER_IMAGE_NAME
+  only:
+    - develop 

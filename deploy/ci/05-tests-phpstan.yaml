@@ -1,0 +1,13 @@
+test:phpstan:
+  stage: Test:phpstan
+  tags: [docker]
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - vendor/
+      - .env
+    policy: pull
+  script:
+    - vendor/bin/phpstan analyse --memory-limit=2G
+  only:
+    - develop

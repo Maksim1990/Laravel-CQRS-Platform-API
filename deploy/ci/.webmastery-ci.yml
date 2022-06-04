@@ -1,0 +1,6 @@
+variables:
+  PHP_DOCKER_BASE_IMAGE: php:8.0.0-fpm-alpine
+  APP_DOCKER_IMAGE_NAME: maksim1990/webmastery_school_api_k8s:latest
+
+include:
+  local: deploy/ci/00-main.yaml

@@ -1,0 +1,10 @@
+parameters:
+    level: 0
+    bootstrapFiles:
+    		- vendor/autoload.php
+    paths:
+        - app
+    excludes_analyse:
+    	- routes
+    	- vendor
+    	- app/Domain/Account

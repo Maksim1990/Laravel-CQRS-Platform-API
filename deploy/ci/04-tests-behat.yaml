@@ -1,0 +1,62 @@
+.behat_test: &behat_test
+  stage: Test:behat
+  tags: [docker]
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - vendor/
+      - .env
+      - behat.yml
+    policy: pull
+  dependencies:
+    - test:phpunit
+  script:
+    - php -S localhost:8000 -t ./public &> /dev/null &
+    - vendor/bin/behat --suite=$BEHAT_TEST_NAME --stop-on-failure
+  only:
+    - develop
+
+API System:
+  variables:
+    BEHAT_TEST_NAME: api_system
+  <<: *behat_test
+
+API Auth:
+  variables:
+    BEHAT_TEST_NAME: api_auth
+  <<: *behat_test
+
+API Courses:
+  variables:
+    BEHAT_TEST_NAME: api_courses
+  <<: *behat_test
+
+API Lessons:
+  variables:
+    BEHAT_TEST_NAME: api_lessons
+  <<: *behat_test
+
+API Tasks:
+  variables:
+    BEHAT_TEST_NAME: api_tasks
+  <<: *behat_test
+
+API Videos:
+  variables:
+    BEHAT_TEST_NAME: api_videos
+  <<: *behat_test
+
+API Comments:
+  variables:
+    BEHAT_TEST_NAME: api_comments
+  <<: *behat_test
+
+API Sections:
+  variables:
+    BEHAT_TEST_NAME: api_sections
+  <<: *behat_test
+
+API Tags:
+  variables:
+    BEHAT_TEST_NAME: api_tags
+  <<: *behat_test

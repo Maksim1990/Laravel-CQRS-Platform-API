@@ -1,0 +1,17 @@
+build:runtime:
+  stage: Build:test runtime
+  tags: [docker]
+  image: $APP_DOCKER_IMAGE_NAME
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - vendor/
+      - deploy/
+      - .env
+      - behat.yml
+  script:
+    - ./scripts/mapping_docker_env_test.sh
+    - cp .env.dist .env && cp behat.dev.yml behat.yml
+    - php -d memory_limit=-1 /usr/local/bin/composer install
+  only:
+    - develop

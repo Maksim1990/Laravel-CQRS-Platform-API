@@ -1,0 +1,58 @@
+# docker build -t maksim1990/platform-api:latest -f ./docker/php/Dockerfile_k8s .
+# docker push maksim1990/platform-api:latest
+FROM php:8.0.0-fpm-alpine
+
+RUN apk --update add wget \
+  curl \
+  git \
+  grep \
+  build-base \
+  libmcrypt-dev \
+  libxml2-dev \
+  pcre-dev \
+  libtool \
+  make \
+  autoconf \
+  g++ \
+  cyrus-sasl-dev \
+  libgsasl-dev \
+  supervisor \
+  zip \
+  bash \
+  libzip-dev \
+  redis \
+  pkgconfig curl-dev openssl-dev \
+  gmp gmp-dev
+RUN pecl channel-update pecl.php.net
+
+RUN pecl install redis
+RUN docker-php-ext-enable redis
+RUN docker-php-ext-configure zip
+RUN docker-php-ext-install -j$(nproc) pdo_mysql zip mysqli bcmath pcntl gmp
+RUN apk add --no-cache libpng libpng-dev freetype-dev libjpeg-turbo-dev libpng-dev \
+        && docker-php-ext-install gd
+
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg
+
+# Install composer and update path
+ENV COMPOSER_HOME /composer
+ENV PATH /composer/vendor/bin:$PATH
+ENV COMPOSER_ALLOW_SUPERUSER 1
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Set working directory PHP
+WORKDIR /var/www
+
+# copy files to image
+COPY . /var/www
+
+RUN php -d memory_limit=-1 /usr/local/bin/composer install --no-dev --optimize-autoloader
+
+RUN /var/www/scripts/set_storage_write_permissions.sh
+RUN chmod +x /var/www/scripts/mapping_docker_env_test.sh
+
+#### Run image under non Root user
+RUN adduser --disabled-password --gecos "" maksim
+USER maksim
+
+CMD ["php-fpm"]

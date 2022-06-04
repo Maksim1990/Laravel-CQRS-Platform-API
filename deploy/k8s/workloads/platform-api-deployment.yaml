@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: platform-api
+  name: platform-api
+spec:
+  minReadySeconds: 0
+  replicas: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: platform-api
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 50%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: platform-api
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - backend
+                topologyKey: kubernetes.io/hostname
+              weight: 100
+      initContainers:
+        - args:
+            - /bin/bash
+            - -c
+            - (php artisan migrate || true) && (php artisan config:cache || true) && (php artisan cache:clear || true) && (php artisan l5-swagger:generate || true) && (cp -a /var/www/. /codebase/)
+          envFrom:
+            - configMapRef:
+                name: backend-school-config
+          image: maksim1990/platform-api:latest
+          imagePullPolicy: Always
+          name: artisan-school
+          volumeMounts:
+            - mountPath: /codebase
+              name: codebase
+
+      containers:
+        - name: platform-service
+          envFrom:
+            - configMapRef:
+                name: backend-school-config
+          image: maksim1990/platform-api:latest
+          imagePullPolicy: Always
+          resources:
+            limits:
+              cpu: 50m
+              memory: 100M
+            requests:
+              cpu: 50m
+              memory: 100M
+          volumeMounts:
+            - mountPath: /var/www
+              name: codebase
+
+        - image: nginx:latest
+          name: nginx
+          livenessProbe:
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            tcpSocket:
+              port: 80
+            timeoutSeconds: 30
+          readinessProbe:
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            tcpSocket:
+              port: 80
+          ports:
+            - containerPort: 80
+              name: http-port
+            - containerPort: 443
+              name: https-port
+          volumeMounts:
+            - name: codebase
+              mountPath: /var/www
+            - name: nginx-config-volume
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+
+
+      imagePullSecrets:
+        - name: myregistrykey
+
+      volumes:
+        - emptyDir: {}
+          name: codebase
+        - name: nginx-config-volume
+          configMap:
+            name: nginx-school-config

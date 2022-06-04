@@ -1,0 +1,25 @@
+version: '3.5'
+
+services:
+    webschool_nginx:
+        image: nginx:latest
+        container_name: webschool_nginx
+        ports:
+            - "7000:80"
+        volumes:
+            - ./docker/nginx/hosts:/etc/nginx/conf.d
+            - ./:/var/www
+        networks:
+          - default
+        depends_on:
+            - webschool_app
+
+    webschool_app:
+        image: maksim1990/webmastery_school_api_k8s:latest
+        container_name: webschool_app
+        user: "${UID}"
+        volumes:
+          - ./:/var/www
+        networks:
+          - default
+

@@ -1,0 +1,23 @@
+image: $PHP_DOCKER_BASE_IMAGE
+
+services:
+  - docker:dind
+
+stages:
+  - Build:image
+  - Build:test runtime
+  - Test:unit
+  - Test:behat
+  - Test:phpstan
+  - Deploy:k8s
+
+before_script:
+  - echo $CI_COMMIT_SHA
+
+include:
+  - local: deploy/ci/01-build-docker-image.yaml
+  - local: deploy/ci/02-build-test-runtime-env.yaml
+  - local: deploy/ci/03-tests-unit.yaml
+  - local: deploy/ci/04-tests-behat.yaml
+  - local: deploy/ci/05-tests-phpstan.yaml
+  - local: deploy/ci/06-deploy-to-k8s.yaml

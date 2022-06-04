@@ -1,0 +1,26 @@
+test:phpunit:
+  stage: Test:unit
+  tags: [docker]
+  image: docker:stable-dind
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - vendor/
+      - .env
+    policy: pull
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - database/database.sqlite
+  before_script:
+    - apk update
+    - apk upgrade
+    - apk add --no-cache --quiet py-pip
+    - pip install --quiet docker-compose~=1.23.0
+  script:
+    - touch ./database/database.sqlite && chmod +rwx ./database/database.sqlite
+    - cp docker-compose.test.yml docker-compose.yml
+    - docker-compose up -d --build
+    - docker exec webschool_app ./vendor/bin/phpunit
+  only:
+    - develop

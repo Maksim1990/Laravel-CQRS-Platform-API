@@ -1,0 +1,60 @@
+default:
+  formatters:
+    progress:
+  suites:
+    api_system:
+      paths: [ features/api/system ]
+      contexts:
+        - rdx\behatvars\BehatVariablesContext
+        - BaseFeatureContext
+    api_auth:
+      paths: [ features/api/auth ]
+      contexts:
+        - rdx\behatvars\BehatVariablesContext
+        - BaseFeatureContext
+    api_courses:
+      paths: [ features/api/courses ]
+      contexts:
+        - rdx\behatvars\BehatVariablesContext
+        - BaseFeatureContext
+    api_lessons:
+      paths: [ features/api/lessons ]
+      contexts:
+        - rdx\behatvars\BehatVariablesContext
+        - BaseFeatureContext
+    api_tasks:
+      paths: [ features/api/tasks ]
+      contexts:
+        - rdx\behatvars\BehatVariablesContext
+        - BaseFeatureContext
+    api_videos:
+      paths: [ features/api/videos ]
+      contexts:
+        - rdx\behatvars\BehatVariablesContext
+        - BaseFeatureContext
+    api_comments:
+      paths: [ features/api/comments ]
+      contexts:
+        - rdx\behatvars\BehatVariablesContext
+        - BaseFeatureContext
+    api_sections:
+      paths: [ features/api/sections ]
+      contexts:
+        - rdx\behatvars\BehatVariablesContext
+        - BaseFeatureContext
+    api_tags:
+      paths: [ features/api/tags ]
+      contexts:
+        - rdx\behatvars\BehatVariablesContext
+        - BaseFeatureContext
+  extensions:
+    rdx\behatvars\BehatVariablesExtension: ~
+    Laracasts\Behat:
+      env_path: .env
+    Imbo\BehatApiExtension:
+      apiClient:
+        #base_uri: http://webschool_nginx:80
+        base_uri: http://localhost:8000
+        #timeout: 5.0
+        verify: false
+
